@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Tabel Pengajuan Cuti</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --primary:#2563eb;
+  --secondary:#1e40af;
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+}
+
+body{
+  margin:0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.container{
+  max-width:1300px;
+  margin:auto;
+  padding:30px;
+}
+
+h1{
+  margin-bottom:20px;
+  color:var(--secondary);
+  font-size:28px;
+}
+
+.card{
+  background:var(--card);
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+.search-box{
+  position:relative;
+  margin-bottom:20px;
+}
+
+.search-box input{
+  width:100%;
+  padding:14px 16px;
+  border-radius:10px;
+  border:1px solid #cbd5e1;
+  font-size:16px;
+}
+
+.autocomplete{
+  position:absolute;
+  top:100%;
+  left:0;
+  right:0;
+  background:#fff;
+  border-radius:0 0 10px 10px;
+  border:1px solid #cbd5e1;
+  border-top:none;
+  max-height:220px;
+  overflow-y:auto;
+  display:none;
+  z-index:10;
+}
+
+.autocomplete div{
+  padding:10px 15px;
+  cursor:pointer;
+}
+
+.autocomplete div:hover{
+  background:#e0e7ff;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+thead{
+  background:var(--primary);
+  color:#fff;
+}
+
+th, td{
+  padding:12px 14px;
+  text-align:left;
+}
+
+tbody tr{
+  border-bottom:1px solid #e5e7eb;
+}
+
+tbody tr:hover{
+  background:#f1f5f9;
+}
+
+.status{
+  padding:6px 10px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+  display:inline-block;
+}
+
+.status.Diajukan{ background:#fde68a; color:#92400e;}
+.status.Disetujui{ background:#bbf7d0; color:#065f46;}
+.status.Ditolak{ background:#fecaca; color:#7f1d1d;}
+
+.footer{
+  margin-top:15px;
+  font-size:13px;
+  color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>📋 Tabel Pengajuan Cuti</h1>
+
+  <div class="card">
+    <div class="search-box">
+      <input type="text" id="searchNama" placeholder="Cari Nama Pegawai...">
+      <div id="autocomplete" class="autocomplete"></div>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>NIP</th>
+            <th>Jenis Cuti</th>
+            <th>Tanggal Pengajuan</th>
+            <th>Tanggal Mulai Cuti</th>
+            <th>Lama Cuti (Hari)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tabelCuti"></tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      Data diurutkan dari pengajuan terbaru ke terlama
+    </div>
+  </div>
+</div>
+
+<script>
+// ================== KONFIGURASI SUPABASE ==================
+const supabaseUrl = "https://ISI_URL_SUPABASE_ANDA";
+const supabaseKey = "ISI_ANON_PUBLIC_KEY_ANDA";
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+// ================== VARIABEL ==================
+let dataCuti = [];
+
+// ================== FORMAT TANGGAL ==================
+function formatTanggal(dateString){
+  if(!dateString) return "-";
+  const d = new Date(dateString);
+  return d.toLocaleDateString("id-ID", {
+    day:"2-digit",
+    month:"2-digit",
+    year:"numeric"
+  });
+}
+
+// ================== LOAD DATA ==================
+async function loadData(){
+  const { data, error } = await supabase
+    .from("pengajuan_cuti")
+    .select("*")
+    .order("created_at", { ascending:false });
+
+  if(error){
+    alert("Gagal memuat data");
+    console.error(error);
+    return;
+  }
+
+  dataCuti = data;
+  renderTable(dataCuti);
+}
+
+// ================== RENDER TABLE ==================
+function renderTable(data){
+  const tbody = document.getElementById("tabelCuti");
+  tbody.innerHTML = "";
+
+  data.forEach(row=>{
+    tbody.innerHTML += `
+      <tr>
+        <td>${row.nama || "-"}</td>
+        <td>${row.nip || "-"}</td>
+        <td>${row.jenis_cuti || "-"}</td>
+        <td>${formatTanggal(row.created_at)}</td>
+        <td>${formatTanggal(row.tanggal_mulai)}</td>
+        <td>${row.lama_cuti || "-"}</td>
+        <td><span class="status ${row.status}">${row.status}</span></td>
+      </tr>
+    `;
+  });
+}
+
+// ================== AUTOCOMPLETE SEARCH ==================
+const input = document.getElementById("searchNama");
+const autoBox = document.getElementById("autocomplete");
+
+input.addEventListener("input", ()=>{
+  const val = input.value.toLowerCase();
+  autoBox.innerHTML = "";
+
+  if(!val){
+    autoBox.style.display="none";
+    renderTable(dataCuti);
+    return;
+  }
+
+  const matches = [...new Set(
+    dataCuti
+      .map(d=>d.nama)
+      .filter(n=>n && n.toLowerCase().includes(val))
+  )];
+
+  matches.forEach(nama=>{
+    const div = document.createElement("div");
+    div.textContent = nama;
+    div.onclick = ()=>{
+      input.value = nama;
+      autoBox.style.display="none";
+      renderTable(dataCuti.filter(d=>d.nama===nama));
+    };
+    autoBox.appendChild(div);
+  });
+
+  autoBox.style.display = matches.length ? "block" : "none";
+});
+
+// ================== INIT ==================
+loadData();
+</script>
+</body>
+</html>
