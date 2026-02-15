@@ -2,78 +2,70 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Tabel Pengajuan Cuti</title>
+<title>Pengajuan Cuti</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root{
-  --primary:#2563eb;
-  --bg:#f8fafc;
-  --card:#ffffff;
-  --text:#0f172a;
-  --muted:#64748b;
-}
-
 body{
   margin:0;
-  font-family:Segoe UI,system-ui;
-  background:var(--bg);
-}
-
-.container{
-  max-width:1300px;
-  margin:auto;
-  padding:30px;
-}
-
-h1{
-  color:#1e40af;
-  margin-bottom:20px;
-}
-
-.card{
-  background:var(--card);
-  border-radius:14px;
-  padding:20px;
-  box-shadow:0 10px 25px rgba(0,0,0,.08);
-}
-
-input{
-  width:100%;
-  padding:14px;
-  border-radius:10px;
-  border:1px solid #cbd5e1;
-  margin-bottom:15px;
-  font-size:15px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-thead{
-  background:#2563eb;
-  color:white;
-}
-
-th,td{
-  padding:12px;
-  border-bottom:1px solid #e5e7eb;
-  text-align:left;
-}
-
-tbody tr:hover{
+  font-family:system-ui,Segoe UI;
   background:#f1f5f9;
 }
 
-.status{
-  padding:6px 12px;
-  border-radius:20px;
-  font-size:13px;
+.container{
+  padding:16px;
+  max-width:600px;
+  margin:auto;
+}
+
+h2{
+  text-align:center;
+  color:#1e40af;
+  margin-bottom:16px;
+}
+
+.search{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #cbd5e1;
+  margin-bottom:16px;
+  font-size:15px;
+}
+
+.card{
+  background:white;
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+  font-size:14px;
+}
+
+.label{
+  color:#64748b;
+}
+
+.value{
   font-weight:600;
+  text-align:right;
+}
+
+.status{
+  margin-top:10px;
+  display:inline-block;
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:700;
 }
 
 .DIAJUKAN{
@@ -83,59 +75,38 @@ tbody tr:hover{
 
 .empty{
   text-align:center;
-  padding:25px;
   color:#64748b;
+  margin-top:40px;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-  <h1>📋 Tabel Pengajuan Cuti</h1>
+  <h2>📋 Pengajuan Cuti</h2>
 
-  <div class="card">
-    <input id="searchNama" placeholder="Cari nama pegawai...">
+  <input id="search" class="search" placeholder="Cari nama pegawai…">
 
-    <table>
-      <thead>
-        <tr>
-          <th>Nama</th>
-          <th>NIP</th>
-          <th>Jenis Cuti</th>
-          <th>Tanggal Pengajuan</th>
-          <th>Tanggal Mulai</th>
-          <th>Lama Cuti (Hari)</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="tabelCuti"></tbody>
-    </table>
-
-    <div id="empty" class="empty" style="display:none">
-      Tidak ada data pengajuan cuti
-    </div>
+  <div id="list"></div>
+  <div id="empty" class="empty" style="display:none">
+    Tidak ada data
   </div>
 </div>
 
 <script>
-/* ===== SUPABASE CONFIG ===== */
+/* ===== SUPABASE ===== */
 const supabase = window.supabase.createClient(
   "https://ufiqibxdgwlysqhinqbz.supabase.co",
   "sb_publishable_EVSVWnsUriOPA_O3RnGTpg_Zmd4pyAL"
 );
 
-let allData = [];
+let dataAll = [];
 
-function formatTanggal(t){
-  if(!t) return "-";
-  return new Date(t).toLocaleDateString("id-ID", {
-    day:"2-digit",
-    month:"2-digit",
-    year:"numeric"
-  });
+function tgl(v){
+  return v ? new Date(v).toLocaleDateString("id-ID") : "-";
 }
 
-async function loadData(){
+async function load(){
   const { data, error } = await supabase
     .from("pengajuan_cuti")
     .select(`
@@ -153,48 +124,65 @@ async function loadData(){
   console.log("ERROR:", error);
 
   if(error){
-    alert("Gagal mengambil data (cek RLS Supabase)");
+    alert("Gagal load data (RLS / policy)");
     return;
   }
 
-  allData = data || [];
-  render(allData);
+  dataAll = data || [];
+  render(dataAll);
 }
 
-function render(data){
-  const tbody = document.getElementById("tabelCuti");
+function render(arr){
+  const list = document.getElementById("list");
   const empty = document.getElementById("empty");
+  list.innerHTML = "";
 
-  tbody.innerHTML = "";
-
-  if(data.length === 0){
+  if(arr.length === 0){
     empty.style.display="block";
     return;
   }
-
   empty.style.display="none";
 
-  data.forEach(r=>{
-    tbody.innerHTML += `
-      <tr>
-        <td>${r.nama ?? "-"}</td>
-        <td>${r.nip ?? "-"}</td>
-        <td>${r.jenis_cuti ?? "-"}</td>
-        <td>${formatTanggal(r.created_at)}</td>
-        <td>${formatTanggal(r.tgl_mulai)}</td>
-        <td>${r.lama_cuti ?? "-"}</td>
-        <td><span class="status ${r.status}">${r.status}</span></td>
-      </tr>
+  arr.forEach(d=>{
+    list.innerHTML += `
+      <div class="card">
+        <div class="row">
+          <span class="label">Nama</span>
+          <span class="value">${d.nama}</span>
+        </div>
+        <div class="row">
+          <span class="label">NIP</span>
+          <span class="value">${d.nip}</span>
+        </div>
+        <div class="row">
+          <span class="label">Jenis Cuti</span>
+          <span class="value">${d.jenis_cuti}</span>
+        </div>
+        <div class="row">
+          <span class="label">Tgl Pengajuan</span>
+          <span class="value">${tgl(d.created_at)}</span>
+        </div>
+        <div class="row">
+          <span class="label">Tgl Mulai</span>
+          <span class="value">${tgl(d.tgl_mulai)}</span>
+        </div>
+        <div class="row">
+          <span class="label">Lama</span>
+          <span class="value">${d.lama_cuti} hari</span>
+        </div>
+
+        <span class="status ${d.status}">${d.status}</span>
+      </div>
     `;
   });
 }
 
-document.getElementById("searchNama").addEventListener("input", e=>{
+document.getElementById("search").addEventListener("input",e=>{
   const v = e.target.value.toLowerCase();
-  render(allData.filter(d => d.nama?.toLowerCase().includes(v)));
+  render(dataAll.filter(x=>x.nama.toLowerCase().includes(v)));
 });
 
-loadData();
+load();
 </script>
 </body>
 </html>
