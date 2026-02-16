@@ -15,74 +15,172 @@ body{
   background:#f1f5f9;
 }
 .container{
-  max-width:720px;
+  max-width:480px;
   margin:auto;
-  padding:16px;
+  padding:14px;
 }
 h2{
   text-align:center;
   color:#1e40af;
-  margin:8px 0 16px;
+  margin:6px 0 12px;
+  font-size:22px;
 }
+
+/* ===== BUTTON AREA ===== */
+.action-box{
+  display:grid;
+  gap:10px;
+  margin-bottom:14px;
+}
+.action-box a{
+  text-decoration:none;
+  padding:14px;
+  border-radius:14px;
+  text-align:center;
+  font-weight:700;
+  font-size:15px;
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
+.btn-ajukan{background:#2563eb;color:#fff}
+.btn-contoh{background:#059669;color:#fff}
+.btn-download{background:#f59e0b;color:#1f2937}
+
+/* ===== SEARCH ===== */
 .search{
   width:100%;
   padding:14px 16px;
-  border-radius:14px;
+  border-radius:16px;
   border:1px solid #cbd5e1;
   font-size:15px;
   margin-bottom:14px;
 }
+
+/* ===== CARD ===== */
 .card{
   background:#fff;
-  border-radius:16px;
+  border-radius:18px;
   padding:16px;
-  margin-bottom:14px;
-  box-shadow:0 8px 20px rgba(0,0,0,.08);
+  margin-bottom:16px;
+  box-shadow:0 10px 24px rgba(0,0,0,.1);
 }
 .row{
   display:flex;
   justify-content:space-between;
-  gap:10px;
+  gap:12px;
   margin-bottom:6px;
   font-size:14px;
 }
 .label{color:#64748b}
-.value{font-weight:600;text-align:right}
+.value{
+  font-weight:700;
+  text-align:right;
+  color:#0f172a;
+}
 .status{
   display:inline-block;
-  margin-top:10px;
-  padding:6px 14px;
+  margin-top:12px;
+  padding:8px 18px;
   border-radius:999px;
   font-size:13px;
-  font-weight:700;
+  font-weight:800;
 }
 .DIAJUKAN{background:#fde68a;color:#92400e}
+
+/* ===== EMPTY ===== */
 .empty{
   text-align:center;
   color:#64748b;
-  margin-top:32px;
+  margin-top:40px;
+}
+
+/* ===== ACCORDION INFO ===== */
+.info{
+  background:#fff;
+  border-radius:18px;
+  margin:18px 0;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+.info-header{
+  padding:14px 16px;
+  font-weight:800;
+  color:#1e40af;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+}
+.info-body{
+  display:none;
+  padding:0 16px 16px;
+  font-size:14px;
+  line-height:1.6;
+  color:#334155;
+}
+.info-body h4{
+  margin:14px 0 6px;
+  color:#0f172a;
 }
 .footer{
   text-align:center;
   color:#94a3b8;
   font-size:12px;
-  margin-top:8px;
+  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
+
   <h2>📋 Pengajuan Cuti</h2>
-  <input id="search" class="search" placeholder="Cari nama pegawai…">
+
+  <!-- ACTION BUTTON -->
+  <div class="action-box">
+    <a class="btn-ajukan" href="https://rikocagat.github.io/cuti-rsds-umpar/" target="_blank">➕ Ajukan Cuti</a>
+    <a class="btn-contoh" href="https://drive.google.com/file/d/12nb8h1-7qXpQQ9T5ps5dwT6Wfhm9t_zx/view" target="_blank">📄 Contoh Pengisian Formulir</a>
+    <a class="btn-download" href="https://drive.google.com/drive/folders/1nlARa3NYZFuFnkgja1r6IJTxseyu3cs0" target="_blank">⬇️ Download Formulir</a>
+  </div>
+
+  <input id="search" class="search" placeholder="🔍 Cari nama pegawai…">
+
   <div id="list"></div>
   <div id="empty" class="empty" style="display:none">Tidak ada data</div>
+
+  <!-- INFO TAMBAHAN -->
+  <div class="info">
+    <div class="info-header" onclick="toggleInfo()">
+      ℹ️ Informasi Tambahan
+      <span id="icon">+</span>
+    </div>
+    <div class="info-body" id="infoBody">
+      <h4>Cuti Tahunan</h4>
+      12 hari kerja per tahun, minimal kerja 1 tahun.
+
+      <h4>Cuti Besar</h4>
+      3 bulan, setelah 5 tahun bekerja terus-menerus.
+
+      <h4>Cuti Sakit</h4>
+      Sesuai rekomendasi dokter, wajib surat keterangan.
+
+      <h4>Cuti Melahirkan</h4>
+      3 bulan penuh, gaji tetap dibayarkan.
+
+      <h4>Cuti Alasan Penting</h4>
+      Maksimal 2 bulan, wajib bukti pendukung.
+
+      <h4>CLTN</h4>
+      Maksimal 3 tahun, tanpa penghasilan & tunjangan.
+
+      <h4>Cuti Umroh / Kerohanian</h4>
+      Termasuk cuti besar, maksimal 3 bulan, disetujui PPK.
+    </div>
+  </div>
+
   <div class="footer">Data terbaru tampil di atas</div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
-  // ===== Supabase Client =====
   if(!window.supabase){
     alert("Supabase JS gagal dimuat");
     return;
@@ -99,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let allData = [];
 
-  const fmt = (v)=> v ? new Date(v).toLocaleDateString("id-ID") : "-";
+  const fmt = v => v ? new Date(v).toLocaleDateString("id-ID") : "-";
 
   async function load(){
     const { data, error } = await client
@@ -108,11 +206,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       .order("created_at",{ascending:false});
 
     if(error){
-      console.error(error);
       alert("Gagal memuat data");
       return;
     }
-
     allData = data || [];
     render(allData);
   }
@@ -147,6 +243,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   load();
 });
+
+function toggleInfo(){
+  const body = document.getElementById("infoBody");
+  const icon = document.getElementById("icon");
+  const show = body.style.display === "block";
+  body.style.display = show ? "none" : "block";
+  icon.textContent = show ? "+" : "−";
+}
 </script>
 </body>
 </html>
