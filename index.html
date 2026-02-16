@@ -12,77 +12,103 @@
 body{
   margin:0;
   font-family:system-ui,Segoe UI;
-  background:#f1f5f9;
+  background:linear-gradient(180deg,#e0f2fe,#f8fafc);
 }
+
+/* ===== HEADER ===== */
+.header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:#ffffffee;
+  backdrop-filter:blur(10px);
+  display:flex;
+  align-items:center;
+  padding:12px 14px;
+  box-shadow:0 6px 14px rgba(0,0,0,.08);
+}
+.back{
+  text-decoration:none;
+  font-size:18px;
+  font-weight:800;
+  color:#1e40af;
+}
+.header-title{
+  flex:1;
+  text-align:center;
+  font-weight:900;
+  font-size:18px;
+  color:#1e3a8a;
+  margin-right:24px;
+}
+
+/* ===== CONTAINER ===== */
 .container{
   max-width:480px;
   margin:auto;
   padding:14px;
 }
-h2{
-  text-align:center;
-  color:#1e40af;
-  margin:6px 0 12px;
-  font-size:22px;
-}
 
 /* ===== BUTTON AREA ===== */
 .action-box{
   display:grid;
-  gap:10px;
-  margin-bottom:14px;
+  gap:12px;
+  margin:10px 0 16px;
 }
 .action-box a{
   text-decoration:none;
-  padding:14px;
-  border-radius:14px;
+  padding:16px;
+  border-radius:18px;
   text-align:center;
-  font-weight:700;
+  font-weight:800;
   font-size:15px;
-  box-shadow:0 6px 16px rgba(0,0,0,.12);
+  box-shadow:0 10px 22px rgba(0,0,0,.14);
+  transition:.2s;
 }
-.btn-ajukan{background:#2563eb;color:#fff}
-.btn-contoh{background:#059669;color:#fff}
-.btn-download{background:#f59e0b;color:#1f2937}
+.action-box a:active{transform:scale(.97)}
+.btn-ajukan{background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff}
+.btn-contoh{background:linear-gradient(135deg,#059669,#047857);color:#fff}
+.btn-download{background:linear-gradient(135deg,#f59e0b,#d97706);color:#1f2937}
 
 /* ===== SEARCH ===== */
 .search{
   width:100%;
-  padding:14px 16px;
-  border-radius:16px;
-  border:1px solid #cbd5e1;
+  padding:15px 18px;
+  border-radius:20px;
+  border:none;
   font-size:15px;
-  margin-bottom:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+  margin-bottom:16px;
 }
 
 /* ===== CARD ===== */
 .card{
   background:#fff;
-  border-radius:18px;
-  padding:16px;
-  margin-bottom:16px;
-  box-shadow:0 10px 24px rgba(0,0,0,.1);
+  border-radius:22px;
+  padding:18px;
+  margin-bottom:18px;
+  box-shadow:0 14px 28px rgba(0,0,0,.15);
 }
 .row{
   display:flex;
   justify-content:space-between;
-  gap:12px;
+  gap:14px;
   margin-bottom:6px;
   font-size:14px;
 }
 .label{color:#64748b}
 .value{
-  font-weight:700;
+  font-weight:800;
   text-align:right;
   color:#0f172a;
 }
 .status{
   display:inline-block;
-  margin-top:12px;
-  padding:8px 18px;
+  margin-top:14px;
+  padding:8px 20px;
   border-radius:999px;
   font-size:13px;
-  font-weight:800;
+  font-weight:900;
 }
 .DIAJUKAN{background:#fde68a;color:#92400e}
 
@@ -93,16 +119,16 @@ h2{
   margin-top:40px;
 }
 
-/* ===== ACCORDION INFO ===== */
+/* ===== INFO ACCORDION ===== */
 .info{
   background:#fff;
-  border-radius:18px;
-  margin:18px 0;
-  box-shadow:0 8px 20px rgba(0,0,0,.08);
+  border-radius:22px;
+  margin:22px 0;
+  box-shadow:0 12px 24px rgba(0,0,0,.12);
 }
 .info-header{
-  padding:14px 16px;
-  font-weight:800;
+  padding:16px 18px;
+  font-weight:900;
   color:#1e40af;
   display:flex;
   justify-content:space-between;
@@ -111,28 +137,34 @@ h2{
 }
 .info-body{
   display:none;
-  padding:0 16px 16px;
+  padding:0 18px 18px;
   font-size:14px;
-  line-height:1.6;
+  line-height:1.65;
   color:#334155;
 }
 .info-body h4{
   margin:14px 0 6px;
   color:#0f172a;
 }
+
 .footer{
   text-align:center;
   color:#94a3b8;
   font-size:12px;
-  margin-top:10px;
+  margin:12px 0 6px;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
 
-  <h2>📋 Pengajuan Cuti</h2>
+<!-- HEADER -->
+<div class="header">
+  <a class="back" href="https://rikoantah.github.io/Web-Utama-UMPAR/">←</a>
+  <div class="header-title">Pengajuan Cuti</div>
+</div>
+
+<div class="container">
 
   <!-- ACTION BUTTON -->
   <div class="action-box">
@@ -146,33 +178,20 @@ h2{
   <div id="list"></div>
   <div id="empty" class="empty" style="display:none">Tidak ada data</div>
 
-  <!-- INFO TAMBAHAN -->
+  <!-- INFO -->
   <div class="info">
     <div class="info-header" onclick="toggleInfo()">
       ℹ️ Informasi Tambahan
       <span id="icon">+</span>
     </div>
     <div class="info-body" id="infoBody">
-      <h4>Cuti Tahunan</h4>
-      12 hari kerja per tahun, minimal kerja 1 tahun.
-
-      <h4>Cuti Besar</h4>
-      3 bulan, setelah 5 tahun bekerja terus-menerus.
-
-      <h4>Cuti Sakit</h4>
-      Sesuai rekomendasi dokter, wajib surat keterangan.
-
-      <h4>Cuti Melahirkan</h4>
-      3 bulan penuh, gaji tetap dibayarkan.
-
-      <h4>Cuti Alasan Penting</h4>
-      Maksimal 2 bulan, wajib bukti pendukung.
-
-      <h4>CLTN</h4>
-      Maksimal 3 tahun, tanpa penghasilan & tunjangan.
-
-      <h4>Cuti Umroh / Kerohanian</h4>
-      Termasuk cuti besar, maksimal 3 bulan, disetujui PPK.
+      <h4>Cuti Tahunan</h4>12 hari kerja per tahun, minimal kerja 1 tahun.
+      <h4>Cuti Besar</h4>3 bulan setelah 5 tahun bekerja.
+      <h4>Cuti Sakit</h4>Sesuai rekomendasi dokter.
+      <h4>Cuti Melahirkan</h4>3 bulan penuh.
+      <h4>Cuti Alasan Penting</h4>Maksimal 2 bulan.
+      <h4>CLTN</h4>Maksimal 3 tahun tanpa penghasilan.
+      <h4>Cuti Umroh</h4>Termasuk cuti besar, disetujui PPK.
     </div>
   </div>
 
@@ -194,62 +213,54 @@ document.addEventListener("DOMContentLoaded", async () => {
   const list = document.getElementById("list");
   const empty = document.getElementById("empty");
   const search = document.getElementById("search");
-
   let allData = [];
 
   const fmt = v => v ? new Date(v).toLocaleDateString("id-ID") : "-";
 
   async function load(){
-    const { data, error } = await client
+    const { data } = await client
       .from("pengajuan_cuti")
       .select("nama,nip,jenis_cuti,tgl_mulai,lama_cuti,status,created_at")
       .order("created_at",{ascending:false});
 
-    if(error){
-      alert("Gagal memuat data");
-      return;
-    }
     allData = data || [];
     render(allData);
   }
 
   function render(arr){
-    list.innerHTML = "";
-    if(arr.length === 0){
-      empty.style.display="block";
-      return;
-    }
+    list.innerHTML="";
+    if(arr.length===0){empty.style.display="block";return}
     empty.style.display="none";
 
     arr.forEach(d=>{
-      list.insertAdjacentHTML("beforeend", `
+      list.insertAdjacentHTML("beforeend",`
         <div class="card">
-          <div class="row"><span class="label">Nama</span><span class="value">${d.nama ?? "-"}</span></div>
-          <div class="row"><span class="label">NIP</span><span class="value">${d.nip ?? "-"}</span></div>
-          <div class="row"><span class="label">Jenis Cuti</span><span class="value">${d.jenis_cuti ?? "-"}</span></div>
+          <div class="row"><span class="label">Nama</span><span class="value">${d.nama||"-"}</span></div>
+          <div class="row"><span class="label">NIP</span><span class="value">${d.nip||"-"}</span></div>
+          <div class="row"><span class="label">Jenis Cuti</span><span class="value">${d.jenis_cuti||"-"}</span></div>
           <div class="row"><span class="label">Tgl Pengajuan</span><span class="value">${fmt(d.created_at)}</span></div>
           <div class="row"><span class="label">Tgl Mulai</span><span class="value">${fmt(d.tgl_mulai)}</span></div>
-          <div class="row"><span class="label">Lama</span><span class="value">${d.lama_cuti ?? "-"} hari</span></div>
+          <div class="row"><span class="label">Lama</span><span class="value">${d.lama_cuti||"-"} hari</span></div>
           <span class="status ${d.status}">${d.status}</span>
         </div>
       `);
     });
   }
 
-  search.addEventListener("input", e=>{
-    const v = e.target.value.toLowerCase();
-    render(allData.filter(x => (x.nama||"").toLowerCase().includes(v)));
+  search.addEventListener("input",e=>{
+    const v=e.target.value.toLowerCase();
+    render(allData.filter(x=>(x.nama||"").toLowerCase().includes(v)));
   });
 
   load();
 });
 
 function toggleInfo(){
-  const body = document.getElementById("infoBody");
-  const icon = document.getElementById("icon");
-  const show = body.style.display === "block";
-  body.style.display = show ? "none" : "block";
-  icon.textContent = show ? "+" : "−";
+  const b=document.getElementById("infoBody");
+  const i=document.getElementById("icon");
+  const s=b.style.display==="block";
+  b.style.display=s?"none":"block";
+  i.textContent=s?"+":"−";
 }
 </script>
 </body>
