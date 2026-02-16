@@ -8,75 +8,65 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+*{box-sizing:border-box}
 body{
   margin:0;
   font-family:system-ui,Segoe UI;
   background:#f1f5f9;
 }
-
 .container{
-  padding:16px;
-  max-width:600px;
+  max-width:720px;
   margin:auto;
+  padding:16px;
 }
-
 h2{
   text-align:center;
   color:#1e40af;
-  margin-bottom:16px;
+  margin:8px 0 16px;
 }
-
 .search{
   width:100%;
-  padding:14px;
-  border-radius:12px;
+  padding:14px 16px;
+  border-radius:14px;
   border:1px solid #cbd5e1;
-  margin-bottom:16px;
   font-size:15px;
+  margin-bottom:14px;
 }
-
 .card{
-  background:white;
+  background:#fff;
   border-radius:16px;
   padding:16px;
   margin-bottom:14px;
-  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
 }
-
 .row{
   display:flex;
   justify-content:space-between;
+  gap:10px;
   margin-bottom:6px;
   font-size:14px;
 }
-
-.label{
-  color:#64748b;
-}
-
-.value{
-  font-weight:600;
-  text-align:right;
-}
-
+.label{color:#64748b}
+.value{font-weight:600;text-align:right}
 .status{
-  margin-top:10px;
   display:inline-block;
+  margin-top:10px;
   padding:6px 14px;
   border-radius:999px;
   font-size:13px;
   font-weight:700;
 }
-
-.DIAJUKAN{
-  background:#fde68a;
-  color:#92400e;
-}
-
+.DIAJUKAN{background:#fde68a;color:#92400e}
 .empty{
   text-align:center;
   color:#64748b;
-  margin-top:40px;
+  margin-top:32px;
+}
+.footer{
+  text-align:center;
+  color:#94a3b8;
+  font-size:12px;
+  margin-top:8px;
 }
 </style>
 </head>
@@ -84,105 +74,79 @@ h2{
 <body>
 <div class="container">
   <h2>📋 Pengajuan Cuti</h2>
-
   <input id="search" class="search" placeholder="Cari nama pegawai…">
-
   <div id="list"></div>
-  <div id="empty" class="empty" style="display:none">
-    Tidak ada data
-  </div>
+  <div id="empty" class="empty" style="display:none">Tidak ada data</div>
+  <div class="footer">Data terbaru tampil di atas</div>
 </div>
 
 <script>
-/* ===== SUPABASE ===== */
-const supabase = window.supabase.createClient(
-  "https://ufiqibxdgwlysqhinqbz.supabase.co",
-  "sb_publishable_EVSVWnsUriOPA_O3RnGTpg_Zmd4pyAL"
-);
-
-let dataAll = [];
-
-function tgl(v){
-  return v ? new Date(v).toLocaleDateString("id-ID") : "-";
-}
-
-async function load(){
-  const { data, error } = await supabase
-    .from("pengajuan_cuti")
-    .select(`
-      nama,
-      nip,
-      jenis_cuti,
-      tgl_mulai,
-      lama_cuti,
-      status,
-      created_at
-    `)
-    .order("created_at", { ascending:false });
-
-  console.log("DATA:", data);
-  console.log("ERROR:", error);
-
-  if(error){
-    alert("Gagal load data (RLS / policy)");
+document.addEventListener("DOMContentLoaded", async () => {
+  // ===== Supabase Client =====
+  if(!window.supabase){
+    alert("Supabase JS gagal dimuat");
     return;
   }
 
-  dataAll = data || [];
-  render(dataAll);
-}
+  const client = window.supabase.createClient(
+    "https://ufiqibxdgwlysqhinqbz.supabase.co",
+    "sb_publishable_EVSVWnsUriOPA_O3RnGTpg_Zmd4pyAL"
+  );
 
-function render(arr){
   const list = document.getElementById("list");
   const empty = document.getElementById("empty");
-  list.innerHTML = "";
+  const search = document.getElementById("search");
 
-  if(arr.length === 0){
-    empty.style.display="block";
-    return;
+  let allData = [];
+
+  const fmt = (v)=> v ? new Date(v).toLocaleDateString("id-ID") : "-";
+
+  async function load(){
+    const { data, error } = await client
+      .from("pengajuan_cuti")
+      .select("nama,nip,jenis_cuti,tgl_mulai,lama_cuti,status,created_at")
+      .order("created_at",{ascending:false});
+
+    if(error){
+      console.error(error);
+      alert("Gagal memuat data");
+      return;
+    }
+
+    allData = data || [];
+    render(allData);
   }
-  empty.style.display="none";
 
-  arr.forEach(d=>{
-    list.innerHTML += `
-      <div class="card">
-        <div class="row">
-          <span class="label">Nama</span>
-          <span class="value">${d.nama}</span>
-        </div>
-        <div class="row">
-          <span class="label">NIP</span>
-          <span class="value">${d.nip}</span>
-        </div>
-        <div class="row">
-          <span class="label">Jenis Cuti</span>
-          <span class="value">${d.jenis_cuti}</span>
-        </div>
-        <div class="row">
-          <span class="label">Tgl Pengajuan</span>
-          <span class="value">${tgl(d.created_at)}</span>
-        </div>
-        <div class="row">
-          <span class="label">Tgl Mulai</span>
-          <span class="value">${tgl(d.tgl_mulai)}</span>
-        </div>
-        <div class="row">
-          <span class="label">Lama</span>
-          <span class="value">${d.lama_cuti} hari</span>
-        </div>
+  function render(arr){
+    list.innerHTML = "";
+    if(arr.length === 0){
+      empty.style.display="block";
+      return;
+    }
+    empty.style.display="none";
 
-        <span class="status ${d.status}">${d.status}</span>
-      </div>
-    `;
+    arr.forEach(d=>{
+      list.insertAdjacentHTML("beforeend", `
+        <div class="card">
+          <div class="row"><span class="label">Nama</span><span class="value">${d.nama ?? "-"}</span></div>
+          <div class="row"><span class="label">NIP</span><span class="value">${d.nip ?? "-"}</span></div>
+          <div class="row"><span class="label">Jenis Cuti</span><span class="value">${d.jenis_cuti ?? "-"}</span></div>
+          <div class="row"><span class="label">Tgl Pengajuan</span><span class="value">${fmt(d.created_at)}</span></div>
+          <div class="row"><span class="label">Tgl Mulai</span><span class="value">${fmt(d.tgl_mulai)}</span></div>
+          <div class="row"><span class="label">Lama</span><span class="value">${d.lama_cuti ?? "-"} hari</span></div>
+          <span class="status ${d.status}">${d.status}</span>
+        </div>
+      `);
+    });
+  }
+
+  search.addEventListener("input", e=>{
+    const v = e.target.value.toLowerCase();
+    render(allData.filter(x => (x.nama||"").toLowerCase().includes(v)));
   });
-}
 
-document.getElementById("search").addEventListener("input",e=>{
-  const v = e.target.value.toLowerCase();
-  render(dataAll.filter(x=>x.nama.toLowerCase().includes(v)));
+  load();
 });
-
-load();
 </script>
 </body>
 </html>
